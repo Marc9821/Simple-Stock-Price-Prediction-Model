@@ -10,7 +10,7 @@ Implemented Models:
 * GPR (GaussianProcessRegressor)
 * HGBR (HistGradientBoostingRegressor)
 * KNN (KNeighborsRegressor)
-* L (LassoC)
+* L (Lasso)
 * LGBM (LGBMRegressor)
 * LL (LassoLars)
 * LR (LinearRegression)

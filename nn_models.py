@@ -1,3 +1,8 @@
+from numpy.random import seed
+seed(1)
+from tensorflow import random
+random.set_seed(1)
+
 from keras.layers import LSTM, Dense, Dropout, Bidirectional
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential

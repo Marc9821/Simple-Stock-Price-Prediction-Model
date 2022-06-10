@@ -1,5 +1,6 @@
 import yfinance as yf
 import pandas as pd
+import time
 import os
 
 
@@ -24,6 +25,7 @@ def get_stock_data(add_to_tickers, start_date='2021-12-29', end_date='2021-12-29
                 temp_ticker = yf.Ticker(ticker=ticker)
                 temp_ticker_hist = temp_ticker.history(start=start_date, end=end_date)
                 ticker_hist_list.append(temp_ticker_hist)
+                time.sleep(1)
             except:
                 print('Ticker not found!')
                 return False

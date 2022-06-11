@@ -223,7 +223,7 @@ def objective(trial, model, X, y, cv_num):
     return mse
 
 def optimize_hyperparameters(model, X, y, cv_num, trial_num):
-    study = optuna.create_study(direction='maximize') # maximize because if maximizes the negative MSE
+    study = optuna.create_study(direction='maximize') # maximize because it maximizes the negative MSE
     study.optimize(lambda trial: objective(trial, model, X, y, cv_num), n_trials=trial_num)
     
     return study

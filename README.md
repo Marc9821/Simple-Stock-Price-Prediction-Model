@@ -25,3 +25,10 @@ Implemented Models:
 * SVM (SupportVectorRegressor)
 * XGB (XGBRegressor)
 * XGBRF (XGBRFRegressor)
+
+## TODO
+
+* Macrodata via API call (https://github.com/bdecon/econ_data)
+* Add actual forecast for user selected stock
+* Use data from same sector (use finnhub API)
+* Create a dashboard

@@ -3,7 +3,7 @@ seed(1)
 from tensorflow import random
 random.set_seed(1)
 
-from keras.layers import LSTM, Dense, Dropout, Bidirectional
+from keras.layers import LSTM, Dense, Dropout, Bidirectional, Flatten
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from keras.optimizers import Adam
@@ -21,7 +21,7 @@ def lstm_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     LSTM_Model.add(Dense(1, activation='linear'))
     LSTM_Model.compile(loss="mean_squared_error" , optimizer=Adam(0.001))
     
-    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=15)
+    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=10)
     
     LSTM_Model.build()
     
@@ -42,6 +42,10 @@ def dnn_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     DNN_Model.add(Dense(75, activation='relu', kernel_initializer='he_normal'))
     DNN_Model.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
     DNN_Model.add(Dense(25, activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Flatten())
+    DNN_Model.add(Dense(12, activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Dense(6, activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Dense(3, activation='relu', kernel_initializer='he_normal'))
     DNN_Model.add(Dense(1, activation='linear'))
     DNN_Model.compile(loss="mean_squared_error" , optimizer=Adam(0.001))
     

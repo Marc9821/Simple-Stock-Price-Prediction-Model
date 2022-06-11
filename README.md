@@ -3,6 +3,7 @@ A simple stock price prediction model using machine learning
 
 Implemented Models:
 * ABR (AdaBoostRegressor)
+* BaR (BaggingRegressor)
 * BR (BayesianRidge)
 * CBR (CatBoostRegressor)
 * ET (ExtraTreeRegressor)
@@ -21,14 +22,14 @@ Implemented Models:
 * PR (PoissonRegressor)
 * R (Ridge)
 * RF (RandomForestRegressor)
-* RNR (RadiusNeighborsRegressor)
 * SVM (SupportVectorRegressor)
 * XGB (XGBRegressor)
 * XGBRF (XGBRFRegressor)
 
 ## TODO
 
-* Macrodata via API call (https://github.com/bdecon/econ_data)
+* Macrodata via API call
 * Add actual forecast for user selected stock
 * Use data from same sector (use finnhub API)
 * Create a dashboard
+* Handle NaN

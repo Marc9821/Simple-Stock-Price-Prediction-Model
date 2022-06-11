@@ -1,11 +1,11 @@
 from numpy.random import seed
 seed(1)
 
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor, HistGradientBoostingRegressor, BaggingRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, LassoLars, BayesianRidge, PoissonRegressor, PassiveAggressiveRegressor
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor, HistGradientBoostingRegressor
-from sklearn.neighbors import KNeighborsRegressor, RadiusNeighborsRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsRegressor
 from xgboost import XGBRegressor, XGBRFRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.tree import ExtraTreeRegressor
@@ -23,7 +23,7 @@ def predict_regression(model_types, X_train, y_train, X_test, cv_num, trial_num)
               'GPR': GaussianProcessRegressor(), 'R': Ridge(),'LL': LassoLars(), 'BR': BayesianRidge(), 'KNN': KNeighborsRegressor(),\
               'L': Lasso(), 'MLP': MLPRegressor(), 'LSVM': LinearSVR(), 'ET': ExtraTreeRegressor(), 'LR': LinearRegression(), \
               'PR': PoissonRegressor(), 'PAR': PassiveAggressiveRegressor(), 'XGB': XGBRegressor(), 'XGBRF': XGBRFRegressor(), 'LGBM': LGBMRegressor(),\
-              'CBR': CatBoostRegressor(), 'RNR': RadiusNeighborsRegressor()}
+              'CBR': CatBoostRegressor(), 'BaR': BaggingRegressor()}
     y_pred = {}
     studies = {}
     
@@ -53,11 +53,21 @@ def get_prediction(models, model_type, X_train, y_train, X_test, cv_num, trial_n
 def objective(trial, model, X, y, cv_num):
     if model == 'ABR':
         abr_loss = trial.suggest_categorical('loss', ['linear', 'square', 'exponential'])
-        abr_n_estimators = trial.suggest.int('n_estimators', 5, 200, step=5)
-        abr_learning_rate = trial.suggest.float('learning_rate', 0.01, 10)
+        abr_n_estimators = trial.suggest_int('n_estimators', 5, 200, step=5)
+        abr_learning_rate = trial.suggest_float('learning_rate', 0.01, 10)
         
         classifier_obj = AdaBoostRegressor(loss=abr_loss, n_estimators=abr_n_estimators, learning_rate=abr_learning_rate)
+    
+    elif model == 'BaR':
+        br_n_estimators = trial.suggest_int('n_estimators', 5, 200, step=5)
+        br_max_samples = trial.suggest_int('max_samples', 1, 200)
+        br_max_features = trial.suggest_int('max_features', 1, 50)
+        br_bootstrap = trial.suggest_categorical('bootstrap', [True, False])
+        br_bootstrap_features = trial.suggest_categorical('bootstrap_features', [True, False])
         
+        classifier_obj = BaggingRegressor(n_estimators=br_n_estimators, max_samples=br_max_samples, max_features=br_max_features, bootstrap=br_bootstrap,\
+            bootstrap_features=br_bootstrap_features)
+    
     elif model == 'BR':
         br_n_iter = trial.suggest_int('n_iter', 10, 510, step=50)
         br_alpha_1 = trial.suggest_float('alpha_1', 1e-10, 1e10, log=True)
@@ -97,23 +107,22 @@ def objective(trial, model, X, y, cv_num):
         classifier_obj = GaussianProcessRegressor(alpha=gpr_alpha)
         
     elif model == 'HGBR':
-        hgbr_n_estimators = trial.suggest_int('n_estimators', 10, 250, step=10)
         hgbr_learning_rate = trial.suggest_float('learning_rate', 0.01, 0.1)
         hgbr_max_depth = trial.suggest_int('max_depth', 10, 100, step=10)
-        hgbr_min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 10)
-        hgbr_max_leaf_nodes = trial.suggest_int('max_leaf_nodes', 1, 10)
+        hgbr_min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 40)
+        hgbr_max_leaf_nodes = trial.suggest_int('max_leaf_nodes', 2, 80, step=3)
         
-        classifier_obj = HistGradientBoostingRegressor(n_estimators=hgbr_n_estimators, learning_rate=hgbr_learning_rate, max_depth=hgbr_max_depth, min_samples_leaf=hgbr_min_samples_leaf,\
+        classifier_obj = HistGradientBoostingRegressor(learning_rate=hgbr_learning_rate, max_depth=hgbr_max_depth, min_samples_leaf=hgbr_min_samples_leaf,\
             max_leaf_nodes=hgbr_max_leaf_nodes)
         
     elif model == 'KNN':
         knn_n_neighbors = trial.suggest_int('n_neighbors', 1, 20)
         knn_weights = trial.suggest_categorical('weights', ['uniform', 'distance'])
-        knn_metrics = trial.suggest_categorical('metrics', ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
+        knn_metric = trial.suggest_categorical('metric', ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
         knn_algorithm = trial.suggest_categorical('algorithm', ['auto', 'ball_tree', 'kd_tree', 'brute'])
         knn_leaf_size = trial.suggest_int('leaf_size', 5, 150, step=5)
         
-        classifier_obj = KNeighborsRegressor(n_neighbors=knn_n_neighbors, weights=knn_weights, algorithm=knn_algorithm, metric=knn_metrics, leaf_size=knn_leaf_size)
+        classifier_obj = KNeighborsRegressor(n_neighbors=knn_n_neighbors, weights=knn_weights, algorithm=knn_algorithm, metric=knn_metric, leaf_size=knn_leaf_size)
         
     elif model == 'L':
         l_alpha = trial.suggest_float('alpha', 1e-10, 1e10, log=True)
@@ -139,6 +148,11 @@ def objective(trial, model, X, y, cv_num):
         lsvm_fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
         
         classifier_obj = LinearSVR(C=lsvm_c, fit_intercept=lsvm_fit_intercept)
+        
+    elif model == 'LR':
+        lr_fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
+        
+        classifier_obj = LinearRegression(fit_intercept=lr_fit_intercept)
         
     elif model == 'MLP':
         mlp_activation = trial.suggest_categorical('activation', ['identity', 'logistic', 'tanh', 'relu'])
@@ -177,18 +191,9 @@ def objective(trial, model, X, y, cv_num):
         classifier_obj = RandomForestRegressor(n_estimators=rf_n_estimators, max_depth=rf_max_depth, min_samples_split=rf_min_samples_split, min_samples_leaf=rf_min_samples_leaf,\
             max_features=rf_max_features)
         
-    elif model == 'RNR':
-        rnr_radius = trial.suggest_int('radius', 1e-10, 1e10, log=True)
-        rnr_weights = trial.suggest_categorical('weights', ['uniform', 'distance'])
-        rnr_metrics = trial.suggest_categorical('metrics', ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
-        rnr_algorithm = trial.suggest_categorical('algorithm', ['auto', 'ball_tree', 'kd_tree', 'brute'])
-        rnr_leaf_size = trial.suggest_int('leaf_size', 5, 150, step=5)
-        
-        classifier_obj = RadiusNeighborsRegressor(radius=rnr_radius, weights=rnr_weights, metric=rnr_metrics, algorithm=rnr_algorithm, leaf_size=rnr_leaf_size)
-        
     elif model == 'SVM':
-        svr_kernel = trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'])
-        svr_degree = trial.suggest_int('degree', 1, 8)
+        svr_kernel = trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf', 'sigmoid'])
+        svr_degree = trial.suggest_int('degree', 1, 10)
         svr_c = trial.suggest_float('C', 1e-10, 1e10, log=True)
         
         classifier_obj = SVR(kernel=svr_kernel, degree=svr_degree, C=svr_c)

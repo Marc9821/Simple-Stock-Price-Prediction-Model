@@ -6,6 +6,7 @@ random.set_seed(1)
 from keras.layers import LSTM, Dense, Dropout, Bidirectional
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential
+from keras.optimizers import Adam
 
 
 def lstm_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
@@ -18,7 +19,7 @@ def lstm_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     LSTM_Model.add(LSTM(50))
     LSTM_Model.add(Dense(10))
     LSTM_Model.add(Dense(1, activation='linear'))
-    LSTM_Model.compile(loss="mean_squared_error" , optimizer="adam")
+    LSTM_Model.compile(loss="mean_squared_error" , optimizer=Adam(0.001))
     
     es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=15)
     
@@ -33,3 +34,30 @@ def lstm_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     test_predict = LSTM_Model.predict(X_test_nn)
     
     return history, test_predict
+
+def dnn_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
+    # setup DNN Model
+    DNN_Model = Sequential()
+    DNN_Model.add(Dense(100, input_shape=(X_train_nn.shape[1], 1), activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Dense(75, activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Dense(25, activation='relu', kernel_initializer='he_normal'))
+    DNN_Model.add(Dense(1, activation='linear'))
+    DNN_Model.compile(loss="mean_squared_error" , optimizer=Adam(0.001))
+    
+    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=10)
+    
+    DNN_Model.build()
+    
+    print(DNN_Model.summary())
+    
+    # train DNN Model
+    history = DNN_Model.fit(X_train_nn, y_train_nn, validation_data=(X_test_nn, y_test_nn), epochs=100, batch_size=32, verbose=1, callbacks=[es])
+    
+    # predict with DNN Model
+    test_predict = DNN_Model.predict(X_test_nn)
+    
+    return history, test_predict
+
+# - Add a Dropout() layer to reduce overfitting
+# - Accelerate training with BatchNormalization()

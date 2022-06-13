@@ -33,3 +33,6 @@ Implemented Models:
 * Use data from same sector (use finnhub API)
 * Create a dashboard
 * Handle NaN
+
+
+This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.

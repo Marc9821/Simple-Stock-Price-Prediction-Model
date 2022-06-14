@@ -1,11 +1,13 @@
 # Simple-Stock-Price-Prediction-Model
 A simple stock price prediction model using machine learning
 
-Implemented Models:
+* * *
+## Implemented Models:
 * ABR (AdaBoostRegressor)
 * BaR (BaggingRegressor)
 * BR (BayesianRidge)
 * CBR (CatBoostRegressor)
+* DNN (Deep Neural Network)
 * ET (ExtraTreeRegressor)
 * GBR (GradientBoostingRegressor)
 * GPR (GaussianProcessRegressor)
@@ -26,13 +28,13 @@ Implemented Models:
 * XGB (XGBRegressor)
 * XGBRF (XGBRFRegressor)
 
+* * *
 ## TODO
-
-* Macrodata via API call
+* Improve LSTM and DNN model (maybe add hyperparameter tuning)
+* Macrodata via API call (add actual data from IMF and World Bank)
 * Add actual forecast for user selected stock
 * Use data from same sector (use finnhub API)
 * Create a dashboard
-* Handle NaN
 
-
+* * *
 This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.

@@ -1,13 +1,18 @@
 from dotenv import load_dotenv
 load_dotenv()
 import pandas as pd
+import numpy as np
 import requests
 import os
 
 FRED_API_KEY = os.getenv('FRED_API_KEY') # you need to register your own API key at https://fred.stlouisfed.org/docs/api/api_key.html
 
-def get_macro_data(api):
-    if api == 'IMF':
+def get_macro_data(api, load):
+    if load:
+        df = pd.read_csv("macrodata.csv", index_col=0, parse_dates=True)
+        return df
+        
+    elif api == 'IMF':
         # get data from IMF - ok
         imf_data = pd.DataFrame()
         imf_base = 'http://dataservices.imf.org/REST/SDMX_JSON.svc'
@@ -29,7 +34,7 @@ def get_macro_data(api):
     elif api == 'FRED':
         # get data from FRED - ok
         fred_data = pd.DataFrame()
-        fred_base = 'https://api.stlouisfed.org/fred/series/observations?series_id='
+        fred_base = 'https://api.stlouisfed.org/fred/series/observations?series_id=' # find series ids at https://fred.stlouisfed.org/
         fred_dict = {'10-Year Breakeven Inflation Rate': 'T10YIEM',
                      '5-Year Breakeven Inflation Rate': 'T5YIEM',
                      'Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity': 'GS10',
@@ -103,6 +108,10 @@ def get_macro_data(api):
         return wb_data
     
 def convert_to_daily(df):
+    df = df.astype(float).fillna(np.nan)
+    if df.isnull().values.any():
+        df = (df.ffill()+df.bfill())/2 # replace nan with average of value before and after the nan
     df = df.resample('D', convention='start').asfreq().fillna(method='ffill')
     df = df[:-1]
+    df.to_csv('macrodata.csv')
     return df

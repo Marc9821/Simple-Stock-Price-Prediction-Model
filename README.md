@@ -31,8 +31,10 @@ A simple stock price prediction model using machine learning
 * * *
 ## TODO
 * Improve LSTM and DNN model (maybe add hyperparameter tuning)
-* Macrodata via API call (add actual data from IMF and World Bank)
+* ~~Only show evaluation every 10 epochs~~
+* Macrodata via API call (add actual data from ~~IMF and~~ World Bank)
 * Add actual forecast for user selected stock
+* Add Feature Importance
 * Use data from same sector (use finnhub API)
 * Create a dashboard
 

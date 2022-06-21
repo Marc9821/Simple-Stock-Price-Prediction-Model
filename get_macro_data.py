@@ -5,6 +5,7 @@ import numpy as np
 import requests
 import os
 
+
 FRED_API_KEY = os.getenv('FRED_API_KEY') # you need to register your own API key at https://fred.stlouisfed.org/docs/api/api_key.html
 
 def get_macro_data(api, load):
@@ -19,14 +20,16 @@ def get_macro_data(api, load):
         imf_dataset = 'IFS' # like IFS (International Financial Statistics) or BOP
         imf_freq = 'M'
         imf_country = 'US' # combine countries with plus
-        imf_series = 'PCPI_IX'
+        imf_dict = {'Goods, Value of Exports, USD': 'TXG_FOB_USD', # find series ids at https://data.imf.org/
+                    'Central Bank Policy Rate': 'FPOLM_PA',}
         imf_start = '2015'
-        imf_end = '2022'
-        imf_url = f'{imf_base}/CompactData/{imf_dataset}/{imf_freq}.{imf_country}.{imf_series}.?startPeriod={imf_start}&endPeriod={imf_end}'
-            
+        imf_end = '2021'
+        
         # download IMF data
-        r = requests.get(imf_url).json()['CompactData']['DataSet']['Series']['Obs']
-        imf_data[imf_series] = [i['@OBS_VALUE'] for i in r]
+        for key, value in imf_dict.items():
+            imf_url = f'{imf_base}/CompactData/{imf_dataset}/{imf_freq}.{imf_country}.{value}.?startPeriod={imf_start}&endPeriod={imf_end}'
+            r = requests.get(imf_url).json()['CompactData']['DataSet']['Series']['Obs']
+            imf_data[key] = [i['@OBS_VALUE'] for i in r]
         imf_data.index = pd.to_datetime([i['@TIME_PERIOD'] for i in r])
         imf_data = convert_to_daily(imf_data)
         return imf_data
@@ -82,6 +85,7 @@ def get_macro_data(api, load):
         
         # loop through all serie ids and download data
         for key, value in fred_dict.items():
+            print(key)
             fred_url = f'{fred_base}{value}&observation_start={fred_start_date}&observation_end={fred_end_date}&api_key={FRED_API_KEY}&file_type=json'
             r = requests.get(fred_url).json()['observations']
             fred_data[key] = [i['value'] for i in r]
@@ -93,7 +97,7 @@ def get_macro_data(api, load):
         # get data from World Bank - ok
         wb_data = pd.DataFrame()
         wb_base = 'http://api.worldbank.org/v2/country/'
-        wb_country = 'us'
+        wb_country = 'US'
         wb_indicator = 'SP.POP.TOTL' # multiple indicators are separated by semicolon
         wb_date = '2015:2022' # date range is separated by colon
         wb_frequency = 'M'
@@ -106,6 +110,15 @@ def get_macro_data(api, load):
         wb_data.sort_index(axis=0, ascending=True, inplace=True)
         wb_data = convert_to_daily(wb_data)
         return wb_data
+    
+    elif api == 'ALL':
+        return print('Not yet implemented')
+        df1 = get_macro_data('IMF', False)
+        df2 = get_macro_data('FRED', False)
+        #df3 = get_macro_data('WB', False)
+        complete_data = pd.concat([df1, df2], axis=1) #, df3
+        complete_data.to_csv('macrodata.csv')
+        return complete_data
     
 def convert_to_daily(df):
     df = df.astype(float).fillna(np.nan)

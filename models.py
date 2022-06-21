@@ -12,6 +12,7 @@ from sklearn.tree import ExtraTreeRegressor
 from sklearn.svm import SVR, LinearSVR
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
+import matplotlib.pyplot as plt
 
 import optuna
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -26,14 +27,16 @@ def predict_regression(model_types, X_train, y_train, X_test, cv_num, trial_num)
               'CBR': CatBoostRegressor(), 'BaR': BaggingRegressor()}
     y_pred = {}
     studies = {}
+    finished_models = {}
     
     for model_type in model_types:
-        pred, study = get_prediction(models, model_type, X_train, y_train, X_test, cv_num, trial_num) 
+        pred, study, model = get_prediction(models, model_type, X_train, y_train, X_test, cv_num, trial_num) 
         y_pred[model_type] = pred
         studies[model_type] = study
+        finished_models[model_type] = model
         print(f'done with {model_type}')
     
-    return y_pred, studies
+    return y_pred, studies, finished_models
 
 def get_prediction(models, model_type, X_train, y_train, X_test, cv_num, trial_num):
     try:
@@ -48,7 +51,7 @@ def get_prediction(models, model_type, X_train, y_train, X_test, cv_num, trial_n
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     
-    return y_pred, study
+    return y_pred, study, model
 
 def objective(trial, model, X, y, cv_num):
     if model == 'ABR':
@@ -228,7 +231,26 @@ def objective(trial, model, X, y, cv_num):
     return mse
 
 def optimize_hyperparameters(model, X, y, cv_num, trial_num):
-    study = optuna.create_study(direction='maximize') # maximize because it maximizes the negative MSE
+    study = optuna.create_study(direction='maximize') # maximize because it maximizes the negative MSE thus minimizing the MSE
     study.optimize(lambda trial: objective(trial, model, X, y, cv_num), n_trials=trial_num)
     
     return study
+
+def feature_importance(models):
+    for key, model in models.items():
+        print(key + '\n')
+        if key == 'LR':
+            importance = model.coef_
+        
+        elif key == 'RF' or key == 'XGB':
+            importance = model.feature_importances_
+        
+        else:
+            continue
+        
+        for i, v in enumerate(importance):
+            print('Feature: %0d, Score: %.5f' % (i, v))
+        plt.bar([x for x in range(len(importance))], importance)
+        plt.show()
+    
+    return

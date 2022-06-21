@@ -34,7 +34,8 @@ A simple stock price prediction model using machine learning
 * ~~Only show evaluation every 10 epochs~~
 * Macrodata via API call (add actual data from ~~IMF and~~ World Bank)
 * Add actual forecast for user selected stock
-* Add Feature Importance
+* Calculate features from stockdata
+* ~~Add Feature Importance~~
 * Use data from same sector (use finnhub API)
 * Create a dashboard
 

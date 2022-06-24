@@ -13,6 +13,7 @@ from sklearn.svm import SVR, LinearSVR
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 import matplotlib.pyplot as plt
+import numpy as np
 
 import optuna
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -236,21 +237,21 @@ def optimize_hyperparameters(model, X, y, cv_num, trial_num):
     
     return study
 
-def feature_importance(models):
+def feature_importance(models, features):
     for key, model in models.items():
-        print(key + '\n')
         if key == 'LR':
             importance = model.coef_
         
         elif key == 'RF' or key == 'XGB':
-            importance = model.feature_importances_
+            importance = model.feature_importances_.argsort()
         
         else:
             continue
         
-        for i, v in enumerate(importance):
-            print('Feature: %0d, Score: %.5f' % (i, v))
-        plt.bar([x for x in range(len(importance))], importance)
+        print(key + '\n')
+        #for i, v in enumerate(importance):
+            #print('Feature: %0d, Score: %.5f' % (i, v))
+        plt.barh(features[importance], model[importance])
         plt.show()
     
     return

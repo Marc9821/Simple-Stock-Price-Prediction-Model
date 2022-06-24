@@ -35,6 +35,7 @@ A simple stock price prediction model using machine learning
 * Macrodata via API call (add actual data from ~~IMF and~~ World Bank)
 * Add actual forecast for user selected stock
 * Calculate features from stockdata
+* Handle data via SQL (SQAlchemy)
 * ~~Add Feature Importance~~
 * Use data from same sector (use finnhub API)
 * Create a dashboard

@@ -98,7 +98,7 @@ def get_macro_data(api, load):
         wb_data = pd.DataFrame()
         wb_base = 'http://api.worldbank.org/v2/country/'
         wb_country = 'US'
-        wb_indicator = 'SP.POP.TOTL' # multiple indicators are separated by semicolon
+        wb_indicator = 'FP.CPI.TOTL.ZG' # multiple indicators are separated by semicolon
         wb_date = '2015:2022' # date range is separated by colon
         wb_frequency = 'M'
         wb_url = f'{wb_base}{wb_country}/indicator/{wb_indicator}?date={wb_date}&frequency={wb_frequency}&format=json'
@@ -112,11 +112,10 @@ def get_macro_data(api, load):
         return wb_data
     
     elif api == 'ALL':
-        return print('Not yet implemented')
         df1 = get_macro_data('IMF', False)
         df2 = get_macro_data('FRED', False)
-        #df3 = get_macro_data('WB', False)
-        complete_data = pd.concat([df1, df2], axis=1) #, df3
+        df3 = get_macro_data('WB', False)
+        complete_data = pd.concat([df1, df2, df3], axis=1)
         complete_data.to_csv('macrodata.csv')
         return complete_data
     

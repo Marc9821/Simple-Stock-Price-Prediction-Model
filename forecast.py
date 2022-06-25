@@ -5,10 +5,10 @@ import finnhub
 import os
 
 
-FINNHUB_API_KEY = os.getenv('FINNHUB_API_KEY') # you need to register your own API key at https://finnhub.io/
-finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
-
 def user_input():
+    FINNHUB_API_KEY = os.getenv('FINNHUB_API_KEY') # you need to register your own API key at https://finnhub.io/
+    finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
+    
     stock_name = []
     stock_name.append(input("Please enter a Stock Ticker to predict: ").upper())
     

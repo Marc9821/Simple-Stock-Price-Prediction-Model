@@ -4,10 +4,15 @@ from tensorflow import random
 random.set_seed(1)
 
 from keras.layers import LSTM, Dense, Dropout, Bidirectional, Flatten
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, Callback
 from keras.models import Sequential
 from keras.optimizers import Adam
 
+
+class CustomPrint(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if epoch % 5 == 0:
+            print(f'Completed epoch {epoch} with MSE {format(logs["loss"], ".4f")} and value of {format(logs["val_loss"], ".4f")}')
 
 def lstm_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     # setup LSTM Model
@@ -28,7 +33,8 @@ def lstm_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     print(LSTM_Model.summary())
     
     # train LSTM Model
-    history = LSTM_Model.fit(X_train_nn, y_train_nn, validation_data=(X_test_nn, y_test_nn), epochs=100, batch_size=32, verbose=1, callbacks=[es])
+    history = LSTM_Model.fit(X_train_nn, y_train_nn, validation_data=(X_test_nn, y_test_nn), epochs=100, batch_size=32, verbose=0, 
+                             callbacks=[es, CustomPrint()])
     
     # predict with LSTM Model
     test_predict = LSTM_Model.predict(X_test_nn)
@@ -56,7 +62,8 @@ def dnn_prediction(X_train_nn, y_train_nn, X_test_nn, y_test_nn):
     print(DNN_Model.summary())
     
     # train DNN Model
-    history = DNN_Model.fit(X_train_nn, y_train_nn, validation_data=(X_test_nn, y_test_nn), epochs=100, batch_size=32, verbose=1, callbacks=[es])
+    history = DNN_Model.fit(X_train_nn, y_train_nn, validation_data=(X_test_nn, y_test_nn), epochs=100, batch_size=32, verbose=0, 
+                            callbacks=[es, CustomPrint()])
     
     # predict with DNN Model
     test_predict = DNN_Model.predict(X_test_nn)

@@ -13,6 +13,7 @@ from sklearn.svm import SVR, LinearSVR
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 
 import optuna
@@ -193,7 +194,7 @@ def objective(trial, model, X, y, cv_num):
         rf_max_features = trial.suggest_categorical('max_features', ['auto', 'sqrt', 'log2'])
         
         classifier_obj = RandomForestRegressor(n_estimators=rf_n_estimators, max_depth=rf_max_depth, min_samples_split=rf_min_samples_split, min_samples_leaf=rf_min_samples_leaf,\
-            max_features=rf_max_features)
+            max_features=rf_max_features, n_jobs=-1)
         
     elif model == 'SVM':
         svr_kernel = trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf', 'sigmoid'])
@@ -236,22 +237,3 @@ def optimize_hyperparameters(model, X, y, cv_num, trial_num):
     study.optimize(lambda trial: objective(trial, model, X, y, cv_num), n_trials=trial_num)
     
     return study
-
-def feature_importance(models, features):
-    for key, model in models.items():
-        if key == 'LR':
-            importance = model.coef_
-        
-        elif key == 'RF' or key == 'XGB':
-            importance = model.feature_importances_.argsort()
-        
-        else:
-            continue
-        
-        print(key + '\n')
-        #for i, v in enumerate(importance):
-            #print('Feature: %0d, Score: %.5f' % (i, v))
-        plt.barh(features[importance], model[importance])
-        plt.show()
-    
-    return

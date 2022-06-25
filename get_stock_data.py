@@ -24,6 +24,7 @@ def get_stock_data(add_to_tickers, start_date='2016-01-01', end_date='2021-12-29
             try:
                 temp_ticker = yf.Ticker(ticker=ticker)
                 temp_ticker_hist = temp_ticker.history(start=start_date, end=end_date)
+                temp_ticker_hist.drop(['Dividends', 'Stock Splits'], axis=1, inplace=True)
                 if len(temp_ticker_hist) == 1509: # specific number is used while testing
                     ticker_hist_list.append(temp_ticker_hist)
                 time.sleep(1)
